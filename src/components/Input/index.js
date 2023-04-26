@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { CustomInput } from './styles';
 import { InputPassword } from './PasswordInput';
 
-export const Input = props => {
+export const Input = React.forwardRef((props, ref) => {
   const [focus, setFocus] = useState(false);
 
   if (props.password) return <InputPassword {...props} />;
@@ -18,9 +18,10 @@ export const Input = props => {
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
       onChangeText={props.setValue}
+      ref={ref}
       {...props}
     />
   );
-};
+});
 
 export default Input;

@@ -9,43 +9,36 @@ import { View } from 'react-native';
 import theme from '../../../theme';
 import { SelectCard } from './components/SelectCard';
 import { AddCard } from './components/AddCard';
+import api from '../../../infra/api';
+import { useAuth } from '../../../contexts/auth';
 
 export default function Categories() {
+  const { auth } = useAuth();
   const [category, setCategory] = useState('');
 
   const [canBeRegisterCategories, setCanBeRegisterCategories] = useState([
-    { id: 1, category: 'Alimentação' },
-    { id: 2, category: 'Moradia' },
-    { id: 3, category: 'Luz' },
+    { id: 0, category: 'Carregando' },
   ]);
+
+  const [registeredCategories, setRegisteredCategories] = useState([]);
 
   const [selectedItems, setSelectedItems] = useState([]);
 
   const toggleItem = itemId => {
-    setSelectedItems(prevState => {
-      const itemIndex = prevState.findIndex(item => item.id === itemId);
+    const itemIndex = selectedItems.findIndex(item => item.id === itemId);
+    if (itemIndex !== -1) {
+      const updatedItems = [...selectedItems];
+      updatedItems.splice(itemIndex, 1);
+      console.log(updatedItems);
+      setSelectedItems(updatedItems);
+    } else {
+      const newItem = canBeRegisterCategories.find(item => item.id === itemId);
+      if (newItem) {
+        console.log([...selectedItems, newItem]);
 
-      if (itemIndex !== -1) {
-        const updatedItems = [...prevState];
-        updatedItems.splice(itemIndex, 1);
-        return updatedItems;
-      } else {
-        const newItem = canBeRegisterCategories.find(
-          item => item.id === itemId
-        );
-        return [...prevState, newItem];
+        setSelectedItems([...selectedItems, newItem]);
       }
-    });
-  };
-
-  const renderItem = ({ item }) => {
-    const isSelected =
-      selectedItems.findIndex(selectedItem => selectedItem.id === item.id) !==
-      -1;
-
-    return (
-      <SelectCard isSelected={isSelected} toggleItem={toggleItem} item={item} />
-    );
+    }
   };
 
   const filteredCategories = canBeRegisterCategories.filter(item =>
@@ -64,6 +57,44 @@ export default function Categories() {
   };
 
   function handleRegister() {}
+
+  async function getAllCategories() {
+    try {
+      const response = await api.get('/categorias_despesas_geral');
+      const formatted = response.data.map(item => {
+        return {
+          id: item.id,
+          category: item.categoria,
+        };
+      });
+      setCanBeRegisterCategories(formatted);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function getUserCategories() {
+    try {
+      const response = await api.post(
+        '/busca_categorias_despesas_geral_usuario',
+        {
+          id_usuario: auth.id,
+        }
+      );
+      setRegisteredCategories(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  useEffect(() => {
+    getAllCategories();
+    getUserCategories();
+  }, []);
+
+  useEffect(() => {
+    console.log(selectedItems);
+  }, [selectedItems]);
 
   return (
     <Container
@@ -87,7 +118,20 @@ export default function Categories() {
             gap: 12,
           }}
           data={filteredCategories}
-          renderItem={renderItem}
+          renderItem={({ item }) => {
+            const isSelected =
+              selectedItems.findIndex(
+                selectedItem => selectedItem.id === item.id
+              ) !== -1;
+
+            return (
+              <SelectCard
+                isSelected={isSelected}
+                toggleItem={toggleItem}
+                item={item}
+              />
+            );
+          }}
           keyExtractor={item => String(item.id)}
           extraData={selectedItems}
           ListEmptyComponent={renderEmptyItem}
@@ -101,9 +145,9 @@ export default function Categories() {
       </Form>
       <Separator />
       <Content>
-        <Title>Últimos 5 registros</Title>
+        <Title>Categorias cadastradas</Title>
         <FlatList
-          data={[{ id: 1 }]}
+          data={registeredCategories}
           contentContainerStyle={{
             gap: 12,
           }}
@@ -120,6 +164,25 @@ export default function Categories() {
               }}
             >
               <Text>teste</Text>
+            </View>
+          )}
+          ListEmptyComponent={() => (
+            <View
+              style={{
+                backgroundColor: theme.colors.white,
+                width: '100%',
+                padding: 32,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: 'center',
+                }}
+              >
+                Sem categorias, tente cadastrar uma para começar
+              </Text>
             </View>
           )}
         />

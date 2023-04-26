@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 
 import { Input } from '../../../components/Input';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Container from '../../../components/Container';
 import Button from '../../../components/Button';
 import Separator from '../../../components/Separator';
@@ -10,11 +10,17 @@ import { FlatList, StatusBar } from 'react-native';
 import { Content, Form, Title } from './styles';
 import Card from '../../../components/Card';
 import { SelectCard } from '../Categories/components/SelectCard';
+import api from '../../../infra/api';
+import { useAuth } from '../../../contexts/auth';
 
 export default function Home() {
+  const { auth } = useAuth();
+
   const [value, setValue] = useState('');
   const [category, setCategory] = useState('');
   const [categorySearch, setCategorySearch] = useState(false);
+
+  const categoryRef = useRef(null);
 
   const [data, setData] = useState([
     { id: 1, value: 20000, category: 'Moradia' },
@@ -66,6 +72,28 @@ export default function Home() {
     setCategory(value);
   };
 
+  function handleCategory() {
+    if (categorySearch === false && category.length > 0) setCategory('');
+    setTimeout(() => categoryRef.current.focus(), 100);
+    setCategorySearch(true);
+  }
+
+  async function getLast5Records() {
+    try {
+      const response = await api.post('/ultimas_despesas_usuario', {
+        id_usuario: auth.id,
+      });
+
+      setData(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  useEffect(() => {
+    getLast5Records();
+  }, []);
+
   return (
     <Container
       noScroll
@@ -89,6 +117,7 @@ export default function Home() {
               value={category}
               editable={categorySearch}
               setValue={handleInputChange}
+              ref={categoryRef}
               style={{ marginBottom: 12 }}
             />
 
@@ -105,7 +134,7 @@ export default function Home() {
             />
           </>
         ) : (
-          <TouchableOpacity onPress={() => setCategorySearch(true)}>
+          <TouchableOpacity onPress={() => handleCategory()}>
             <Input
               label="categoria"
               value={category}
@@ -139,6 +168,17 @@ export default function Home() {
             renderItem={({ item }) => {
               return <Card item={item} />;
             }}
+            ListEmptyComponent={() => (
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: theme.fontSize.medium,
+                  textAlign: 'center',
+                }}
+              >
+                Sem últimos registros, cadastre um para começar
+              </Text>
+            )}
           />
         ) : (
           <></>

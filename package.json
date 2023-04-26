@@ -7,12 +7,14 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "eas:update": "eas update --branch main"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.5.7",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
+    "axios": "^1.3.6",
     "expo": "~48.0.11",
     "expo-status-bar": "~1.4.4",
     "expo-updates": "^0.16.4",

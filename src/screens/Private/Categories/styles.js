@@ -16,3 +16,22 @@ export const Title = styled.Text`
   width: 100%;
   margin-vertical: 12px;
 `;
+
+// styles.js
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+  containerStyle: {
+    paddingTop: StatusBar.currentHeight,
+    borderWidth: 1,
+  },
+  inputStyle: {
+    marginBottom: 12,
+  },
+  separatorStyle: {
+    marginBottom: 5,
+  },
+  buttonStyle: {
+    marginVertical: 12,
+  },
+});

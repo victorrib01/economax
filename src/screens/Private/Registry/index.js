@@ -28,7 +28,7 @@ export default function Registry() {
       }}
     >
       <Content>
-        <Title>Categorias cadastrados</Title>
+        <Title>Últimos 5 registros</Title>
         <FlatList
           data={data}
           contentContainerStyle={{
