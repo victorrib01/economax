@@ -20,6 +20,7 @@ export const InputPassword = props => {
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
         onChangeText={props.setValue}
+        editable={props.editable}
         secureTextEntry={hide}
       />
       <HidePassButton onPress={() => setHide(!hide)}>

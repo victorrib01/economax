@@ -14,6 +14,7 @@ import { SelectCard } from '../Categories/components/SelectCard';
 export default function Home() {
   const [value, setValue] = useState('');
   const [category, setCategory] = useState('');
+  const [categorySearch, setCategorySearch] = useState(false);
 
   const [data, setData] = useState([
     { id: 1, value: 20000, category: 'Moradia' },
@@ -23,7 +24,7 @@ export default function Home() {
     { id: 5, value: 120000, category: 'Luz' },
   ]);
 
-  const [showLastRecords, setShowsLastRecords] = useState(false);
+  const [showLastRecords, setShowsLastRecords] = useState(true);
 
   function handleRegister() {}
 
@@ -36,8 +37,9 @@ export default function Home() {
   const [selectedItem, setSelectedItem] = useState(null);
 
   const toggleItem = item => {
-    handleInputChange('');
+    handleInputChange(item.category);
     setSelectedItem(item.id);
+    setCategorySearch(false);
   };
 
   const renderItem = ({ item }) => {
@@ -80,23 +82,39 @@ export default function Home() {
           setValue={setValue}
           style={{ marginBottom: 12 }}
         />
-        <Input
-          label="categoria"
-          value={category}
-          setValue={handleInputChange}
-          style={{ marginBottom: 12 }}
-        />
-        <Separator style={{ marginBottom: 5 }} />
+        {categorySearch ? (
+          <>
+            <Input
+              label="categoria"
+              value={category}
+              editable={categorySearch}
+              setValue={handleInputChange}
+              style={{ marginBottom: 12 }}
+            />
 
-        <FlatList
-          contentContainerStyle={{
-            gap: 12,
-          }}
-          data={filteredCategories}
-          renderItem={renderItem}
-          keyExtractor={item => String(item.id)}
-          ListEmptyComponent={renderEmptyItem}
-        />
+            <Separator style={{ marginBottom: 5 }} />
+
+            <FlatList
+              contentContainerStyle={{
+                gap: 12,
+              }}
+              data={filteredCategories}
+              renderItem={renderItem}
+              keyExtractor={item => String(item.id)}
+              ListEmptyComponent={renderEmptyItem}
+            />
+          </>
+        ) : (
+          <TouchableOpacity onPress={() => setCategorySearch(true)}>
+            <Input
+              label="categoria"
+              value={category}
+              editable={categorySearch}
+              setValue={handleInputChange}
+              style={{ marginBottom: 12 }}
+            />
+          </TouchableOpacity>
+        )}
 
         <Button
           style={{ marginVertical: 12 }}
@@ -107,9 +125,9 @@ export default function Home() {
 
       <Separator />
       <Content>
-        <TouchableOpacity onPress={() => setShowsLastRecords(!showLastRecords)}>
-          <Title>Últimos 5 registros</Title>
-        </TouchableOpacity>
+        {/* <TouchableOpacity onPress={() => setShowsLastRecords(!showLastRecords)}> */}
+        <Title>Últimos 5 registros</Title>
+        {/* </TouchableOpacity> */}
         {showLastRecords ? (
           <FlatList
             data={data}

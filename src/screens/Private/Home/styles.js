@@ -8,7 +8,7 @@ export const Form = styled.View`
 
 export const Content = styled.View`
   width: 100%;
-  height: 58%;
+  height: 40%;
 `;
 
 export const Title = styled.Text`

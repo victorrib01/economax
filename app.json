@@ -11,9 +11,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.victorrib01.economax"
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +34,11 @@
       }
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/54273f39-f950-4494-a6e2-952d2c4e2400"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }
