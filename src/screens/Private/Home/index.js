@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 
 import { Input } from '../../../components/Input';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Container from '../../../components/Container';
 import Button from '../../../components/Button';
 import Separator from '../../../components/Separator';
@@ -12,9 +12,14 @@ import Card from '../../../components/Card';
 import { SelectCard } from '../Categories/components/SelectCard';
 import api from '../../../infra/api';
 import { useAuth } from '../../../contexts/auth';
+import { useUser } from '../../../contexts/user';
+import { useFocusEffect } from '@react-navigation/native';
+import reaisToCentavos from '../../../utils/formatReiasToCentavos';
+import { RefreshControl } from 'react-native';
 
 export default function Home() {
   const { auth } = useAuth();
+  const { userCategories } = useUser();
 
   const [value, setValue] = useState('');
   const [category, setCategory] = useState('');
@@ -22,17 +27,9 @@ export default function Home() {
 
   const categoryRef = useRef(null);
 
-  const [data, setData] = useState([
-    { id: 1, value: 20000, category: 'Moradia' },
-    { id: 2, value: 50000, category: 'Aluguel' },
-    { id: 3, value: 60000, category: 'Alimentação' },
-    { id: 4, value: 90000, category: 'Balada' },
-    { id: 5, value: 120000, category: 'Luz' },
-  ]);
+  const [data, setData] = useState([]);
 
   const [showLastRecords, setShowsLastRecords] = useState(true);
-
-  function handleRegister() {}
 
   const [canBeRegisterCategories, setCanBeRegisterCategories] = useState([
     { id: 1, category: 'Alimentação' },
@@ -41,7 +38,32 @@ export default function Home() {
   ]);
 
   const [selectedItem, setSelectedItem] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
+  async function handleRegister() {
+    if (!reaisToCentavos(value) || !selectedItem)
+      return Alert.alert('Preencha todos os campos!');
+    try {
+      const response = await api.post('/cadastro_gastos_usuario', {
+        id_usuario: auth.id,
+        gastos: [
+          {
+            id_categoria: selectedItem,
+            valor: `${reaisToCentavos(value)}`,
+          },
+        ],
+      });
+      if (response.data.message === 'Gastos inseridos com sucesso!') {
+        Alert.alert('Gasto inserido com sucesso!');
+        setValue('');
+        setCategory('');
+        setSelectedItem(null);
+        getLast5Records();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
   const toggleItem = item => {
     handleInputChange(item.category);
     setSelectedItem(item.id);
@@ -82,17 +104,67 @@ export default function Home() {
     try {
       const response = await api.post('/ultimas_despesas_usuario', {
         id_usuario: auth.id,
+        Usuario: auth.user,
       });
 
-      setData(response.data);
+      function parseDate(dateString) {
+        const [date, time] = dateString.split(' ');
+        const [year, month, day] = date.split('/').map(Number);
+        const [hours, minutes, seconds] = time.split(':').map(Number);
+
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+      }
+
+      const sortedData = response.data
+        .map(item => {
+          return {
+            data: parseDate(item.data),
+            category: item.categoria,
+            // MOCK
+            value: Math.floor(Math.random() * (99999 - 50 + 1) + 50),
+          };
+        })
+        .sort((a, b) => b.data - a.data);
+
+      setData(sortedData);
     } catch (err) {
       console.error(err);
     }
   }
 
-  useEffect(() => {
-    getLast5Records();
+  async function getUserCategories() {
+    try {
+      const response = await api.post(
+        '/busca_categorias_despesas_geral_usuario',
+        {
+          id_usuario: auth.id,
+        }
+      );
+      setCanBeRegisterCategories(
+        response.data.map(item => {
+          return {
+            category: item.categoria,
+            id: item.id,
+          };
+        })
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await getLast5Records();
+    setRefreshing(false);
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      getLast5Records();
+      getUserCategories();
+    }, [])
+  );
 
   return (
     <Container
@@ -164,10 +236,13 @@ export default function Home() {
               gap: 12,
             }}
             scrollEnabled
-            keyExtractor={item => String(item.id)}
+            keyExtractor={item => String(item.value)}
             renderItem={({ item }) => {
               return <Card item={item} />;
             }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             ListEmptyComponent={() => (
               <Text
                 style={{

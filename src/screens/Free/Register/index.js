@@ -42,8 +42,6 @@ export default function Register() {
     } else {
       Alert.alert(response.data['Message'], 'Tenta novamente');
     }
-
-    console.log(response.data);
   }
 
   function handleGoBack() {

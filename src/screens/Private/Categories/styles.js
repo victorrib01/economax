@@ -1,4 +1,5 @@
 import styled from 'styled-components/native';
+import { StatusBar, StyleSheet } from 'react-native';
 
 export const Form = styled.View`
   width: 100%;
@@ -18,7 +19,6 @@ export const Title = styled.Text`
 `;
 
 // styles.js
-import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   containerStyle: {

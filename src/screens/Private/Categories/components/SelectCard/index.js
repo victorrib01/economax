@@ -9,7 +9,7 @@ export const SelectCard = props => {
 
   return (
     <TouchableOpacity
-      onPress={() => toggleItem(item.id)}
+      onPress={() => toggleItem(item)}
       style={
         selected
           ? {
