@@ -1,5 +1,5 @@
 import { Input } from '../../../components/Input';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Container from '../../../components/Container';
 import Button from '../../../components/Button';
 import Separator from '../../../components/Separator';
@@ -26,14 +26,21 @@ export default function Categories() {
   const { auth } = useAuth();
   const { setUserCategories } = useUser();
   const [category, setCategory] = useState('');
+  const inputRef = useRef(null);
 
   const [canBeRegisterCategories, setCanBeRegisterCategories] = useState([
     { id: 0, category: 'Carregando' },
   ]);
 
-  const filteredCategories = canBeRegisterCategories.filter(item =>
-    item.category.toLowerCase().includes(category.toLowerCase())
-  );
+  const filteredCategories = canBeRegisterCategories.filter(item => {
+    // console.log(category[category.length - 1] === ' ');
+    if (category[category.length - 1] === ' ') {
+      return item.category
+        .toLowerCase()
+        .includes(category.slice(1, category.length - 1).toLowerCase());
+    }
+    return item.category.toLowerCase().includes(category.toLowerCase());
+  });
   const [registeredCategories, setRegisteredCategories] = useState([]);
 
   const [selectedItems, setSelectedItems] = useState([]);
@@ -79,6 +86,8 @@ export default function Categories() {
         setSelectedItems([...selectedItems, newItem]);
       }
     }
+
+    setCategory('');
   };
 
   async function handleRegister() {
@@ -112,6 +121,7 @@ export default function Categories() {
           category={category}
           setCategory={setCategory}
           fetchData={fetchData}
+          inputRef={inputRef}
         />
       );
     } else if (searchResult === 'registered') {
@@ -143,24 +153,50 @@ export default function Categories() {
       selectedItems.findIndex(selectedItem => selectedItem.id === item.id) !==
       -1;
 
+    if (
+      canBeRegisterCategories.filter(item => item.category === category)
+        .length === 0 &&
+      category.length > 0 &&
+      !canBeRegisterCategories.filter(item => item.category === category.trim())
+        .length
+    )
+      return (
+        <>
+          <SelectCard
+            isSelected={isSelected}
+            toggleItem={toggleItem}
+            item={item}
+          />
+          <View style={{ marginTop: 20 }} />
+          <AddCard
+            category={category}
+            setCategory={setCategory}
+            fetchData={fetchData}
+            inputRef={inputRef}
+          />
+        </>
+      );
+
     return (
       <SelectCard isSelected={isSelected} toggleItem={toggleItem} item={item} />
     );
   };
 
-  const renderRegisteredItem = ({ item }) => (
-    <View
-      style={{
-        backgroundColor: theme.colors.white,
-        width: '100%',
-        padding: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Text>{item?.categoria}</Text>
-    </View>
-  );
+  const renderRegisteredItem = ({ item }) => {
+    return (
+      <View
+        style={{
+          backgroundColor: theme.colors.white,
+          width: '100%',
+          padding: 32,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text>{item?.categoria}</Text>
+      </View>
+    );
+  };
 
   const renderEmptyComponent = () => (
     <View
@@ -252,6 +288,7 @@ export default function Categories() {
               value={category}
               setValue={handleInputChange}
               style={styles.inputStyle}
+              ref={inputRef}
             />
             <Separator style={styles.separatorStyle} />
 

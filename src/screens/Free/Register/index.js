@@ -52,7 +52,11 @@ export default function Register() {
     <Container>
       <Logo />
       <Form>
-        <Input label="usuário" value={user} setValue={setUser} />
+        <Input
+          label="usuário"
+          value={user}
+          setValue={text => setUser(text.replace(' ', ''))}
+        />
         <Input
           label="senha"
           secureTextEntry={hide}

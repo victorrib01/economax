@@ -1,4 +1,5 @@
 export default function reaisToCentavos(valorReais) {
-  const valorCentavos = Math.round(valorReais * 100);
+  let value = valorReais.replace(',', '.');
+  const valorCentavos = Math.round(value * 100);
   return valorCentavos;
 }

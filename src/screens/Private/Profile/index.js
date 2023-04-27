@@ -29,6 +29,7 @@ export default function Profile() {
           width: '90%',
         }}
       >
+        <Title>ID: {auth.id}</Title>
         <Title>Usuario: {auth.user}</Title>
         <Button title="Sair" onPress={handleSignOut} />
       </View>
