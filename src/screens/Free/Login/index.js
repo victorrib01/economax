@@ -27,7 +27,6 @@ export default function Login() {
       if (response.data['Message'] === 'Usuário autenticado com sucesso!') {
         saveAuthData({ user, id: response.data['id_usuario'] });
       }
-      console.log(response.data);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
