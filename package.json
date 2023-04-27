@@ -8,7 +8,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "format": "prettier --write .",
-    "eas:update": "eas update --branch main"
+    "eas:update": "eas update --branch main",
+    "build:apk": "eas build --platform android --profile preview"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.5.7",

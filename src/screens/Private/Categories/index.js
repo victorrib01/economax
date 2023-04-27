@@ -3,13 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Container from '../../../components/Container';
 import Button from '../../../components/Button';
 import Separator from '../../../components/Separator';
-import {
-  ActivityIndicator,
-  FlatList,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import { ActivityIndicator, FlatList, Text } from 'react-native';
 import { Content, Form, Title } from './styles';
 import { View } from 'react-native';
 import theme from '../../../theme';
@@ -24,7 +18,6 @@ import { RefreshControl } from 'react-native';
 
 export default function Categories() {
   const { auth } = useAuth();
-  const { setUserCategories } = useUser();
   const [category, setCategory] = useState('');
   const inputRef = useRef(null);
 
@@ -33,7 +26,6 @@ export default function Categories() {
   ]);
 
   const filteredCategories = canBeRegisterCategories.filter(item => {
-    // console.log(category[category.length - 1] === ' ');
     if (category[category.length - 1] === ' ') {
       return item.category
         .toLowerCase()
@@ -52,9 +44,9 @@ export default function Categories() {
     setRefreshing(true);
     await fetchData();
     setRefreshing(false);
-  }, []);
+  }, [fetchData]);
 
-  const searchCategories = () => {
+  const searchCategories = useCallback(() => {
     const categoryInCanBeRegistered = filteredCategories.find(
       item => item.category.toLowerCase() === category.toLowerCase()
     );
@@ -70,28 +62,29 @@ export default function Categories() {
     } else {
       return 'unregistered';
     }
-  };
+  }, [category, filteredCategories, registeredCategories]);
 
-  const toggleItem = itemId => {
-    const itemIndex = selectedItems.findIndex(item => item.id === itemId.id);
-    if (itemIndex !== -1) {
-      const updatedItems = [...selectedItems];
-      updatedItems.splice(itemIndex, 1);
-      setSelectedItems(updatedItems);
-    } else {
-      const newItem = canBeRegisterCategories.find(
-        item => item.id === itemId.id
-      );
-      if (newItem) {
-        setSelectedItems([...selectedItems, newItem]);
+  const toggleItem = useCallback(
+    itemId => {
+      const itemIndex = selectedItems.findIndex(item => item.id === itemId.id);
+      if (itemIndex !== -1) {
+        const updatedItems = [...selectedItems];
+        updatedItems.splice(itemIndex, 1);
+        setSelectedItems(updatedItems);
+      } else {
+        const newItem = filteredCategories.find(item => item.id === itemId.id);
+        if (newItem) {
+          setSelectedItems([...selectedItems, newItem]);
+        }
       }
-    }
 
-    setCategory('');
-  };
+      setCategory('');
+    },
+    [filteredCategories, selectedItems]
+  );
 
-  async function handleRegister() {
-    if (selectedItems.length == 0) return;
+  const handleRegister = useCallback(async () => {
+    if (selectedItems.length === 0) return;
     try {
       const categorias = selectedItems.map(item => {
         return {
@@ -105,14 +98,13 @@ export default function Categories() {
       });
 
       console.log(response.data);
-      await getAllCategories();
-      await getUserCategories();
+      await fetchData();
     } catch (err) {
       console.error(err);
     }
-  }
+  }, [auth.id, fetchData, selectedItems]);
 
-  const renderEmptyItem = () => {
+  const renderEmptyItem = useCallback(() => {
     const searchResult = searchCategories();
 
     if (searchResult === 'add') {
@@ -139,50 +131,58 @@ export default function Categories() {
         </View>
       );
     }
-  };
+  }, [category, fetchData, searchCategories]);
 
-  const handleInputChange = value => {
+  const handleInputChange = useCallback(value => {
     if (value.endsWith('  ')) {
       return;
     }
     setCategory(value);
-  };
+  }, []);
 
-  const renderItem = ({ item }) => {
-    const isSelected =
-      selectedItems.findIndex(selectedItem => selectedItem.id === item.id) !==
-      -1;
+  const renderItem = useCallback(
+    ({ item }) => {
+      const isSelected =
+        selectedItems.findIndex(selectedItem => selectedItem.id === item.id) !==
+        -1;
 
-    if (
-      canBeRegisterCategories.filter(item => item.category === category)
-        .length === 0 &&
-      category.length > 0 &&
-      !canBeRegisterCategories.filter(item => item.category === category.trim())
-        .length
-    )
+      if (
+        canBeRegisterCategories.filter(item => item.category === category)
+          .length === 0 &&
+        category.length > 0 &&
+        !canBeRegisterCategories.filter(
+          item => item.category === category.trim()
+        ).length
+      )
+        return (
+          <>
+            <SelectCard
+              isSelected={isSelected}
+              toggleItem={toggleItem}
+              item={item}
+            />
+            <View style={{ marginTop: 20 }} />
+            <AddCard
+              category={category}
+              setCategory={setCategory}
+              fetchData={fetchData}
+              inputRef={inputRef}
+            />
+          </>
+        );
+
       return (
-        <>
-          <SelectCard
-            isSelected={isSelected}
-            toggleItem={toggleItem}
-            item={item}
-          />
-          <View style={{ marginTop: 20 }} />
-          <AddCard
-            category={category}
-            setCategory={setCategory}
-            fetchData={fetchData}
-            inputRef={inputRef}
-          />
-        </>
+        <SelectCard
+          isSelected={isSelected}
+          toggleItem={toggleItem}
+          item={item}
+        />
       );
+    },
+    [canBeRegisterCategories, category, fetchData, selectedItems, toggleItem]
+  );
 
-    return (
-      <SelectCard isSelected={isSelected} toggleItem={toggleItem} item={item} />
-    );
-  };
-
-  const renderRegisteredItem = ({ item }) => {
+  const renderRegisteredItem = useCallback(({ item }) => {
     return (
       <View
         style={{
@@ -196,29 +196,32 @@ export default function Categories() {
         <Text>{item?.categoria}</Text>
       </View>
     );
-  };
+  }, []);
 
-  const renderEmptyComponent = () => (
-    <View
-      style={{
-        backgroundColor: theme.colors.white,
-        width: '100%',
-        padding: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Text
+  const renderEmptyComponent = useCallback(
+    () => (
+      <View
         style={{
-          textAlign: 'center',
+          backgroundColor: theme.colors.white,
+          width: '100%',
+          padding: 32,
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        Sem categorias, tente cadastrar uma para começar
-      </Text>
-    </View>
+        <Text
+          style={{
+            textAlign: 'center',
+          }}
+        >
+          Sem categorias, tente cadastrar uma para começar
+        </Text>
+      </View>
+    ),
+    []
   );
 
-  async function getAllCategories() {
+  const getAllCategories = useCallback(async () => {
     try {
       const response = await api.get('/categorias_despesas_geral');
       setCanBeRegisterCategories(
@@ -232,9 +235,9 @@ export default function Categories() {
     } catch (err) {
       console.error(err);
     }
-  }
+  }, []);
 
-  async function getUserCategories() {
+  const getUserCategories = useCallback(async () => {
     try {
       const response = await api.post(
         '/busca_categorias_despesas_geral_usuario',
@@ -242,12 +245,11 @@ export default function Categories() {
           id_usuario: auth.id,
         }
       );
-      setUserCategories(response.data);
       setRegisteredCategories(response.data);
     } catch (err) {
       console.error(err);
     }
-  }
+  }, [auth]);
 
   function filterCategories() {
     const filtered = canBeRegisterCategories.filter(
@@ -261,19 +263,25 @@ export default function Categories() {
     setCanBeRegisterCategories(filtered);
   }
 
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     await getAllCategories();
     await getUserCategories();
     setLoading(false);
-  }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
+      async function fetchData() {
+        setLoading(true);
+        await getAllCategories();
+        await getUserCategories();
+        setLoading(false);
+      }
+
       fetchData();
     }, [])
   );
-
   useEffect(() => {
     filterCategories();
   }, [registeredCategories]);
