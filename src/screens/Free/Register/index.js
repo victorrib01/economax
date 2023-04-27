@@ -75,7 +75,7 @@ export default function Register() {
         </HidePassButton>
       </Form>
       <Buttons>
-        <Button title="Registar" onPress={handleRegister} />
+        <Button title="Registrar" onPress={handleRegister} />
         <Button title="Voltar" outline onPress={handleGoBack} />
       </Buttons>
     </Container>
