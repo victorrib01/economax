@@ -19,8 +19,8 @@ export default function Login() {
   async function handleLogin() {
     try {
       const response = await api.post('/login', {
-        Usuario: user.trim(),
-        Senha: pass,
+        usuario: user.trim(),
+        senha: pass,
       });
       if (response.data['Message'] === 'Usuário ou senha incorretos!')
         Alert.alert(response.data['Message'], 'Tente novamente.');
@@ -41,7 +41,12 @@ export default function Login() {
     <Container>
       <Logo />
       <Form>
-        <Input label="usuário" value={user} setValue={setUser} />
+        <Input
+          label="usuário"
+          value={user}
+          autoCapitalize={'none'}
+          setValue={text => setUser(text.toLowerCase())}
+        />
         <Input label="senha" password value={pass} setValue={setPass} />
       </Form>
       <Buttons>

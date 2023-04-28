@@ -46,6 +46,7 @@ export default function Home() {
     try {
       const response = await api.post('/cadastro_gastos_usuario', {
         id_usuario: auth.id,
+        usuario: auth.user,
         gastos: [
           {
             id_categoria: selectedItem,
@@ -104,7 +105,7 @@ export default function Home() {
     try {
       const response = await api.post('/ultimas_despesas_usuario', {
         id_usuario: auth.id,
-        Usuario: auth.user,
+        usuario: auth.user,
       });
 
       function parseDate(dateString) {
@@ -121,7 +122,8 @@ export default function Home() {
             data: parseDate(item.data),
             category: item.categoria,
             // MOCK
-            value: Math.floor(Math.random() * (99999 - 50 + 1) + 50),
+            value: item.valor,
+            // value: Math.floor(Math.random() * (99999 - 50 + 1) + 50),
           };
         })
         .sort((a, b) => b.data - a.data);

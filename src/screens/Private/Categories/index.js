@@ -11,10 +11,15 @@ import { SelectCard } from './components/SelectCard';
 import { AddCard } from './components/AddCard';
 import api from '../../../infra/api';
 import { useAuth } from '../../../contexts/auth';
-import { useUser } from '../../../contexts/user';
 import { styles } from './styles';
 import { useFocusEffect } from '@react-navigation/native';
 import { RefreshControl } from 'react-native';
+import {
+  assignCategory,
+  getAllCategories,
+  getUserCategories,
+} from './services';
+import emptyRegisteredComponent from './components/EmptyRegisteredComponent';
 
 export default function Categories() {
   const { auth } = useAuth();
@@ -85,26 +90,10 @@ export default function Categories() {
 
   const handleRegister = useCallback(async () => {
     if (selectedItems.length === 0) return;
-    try {
-      const categorias = selectedItems.map(item => {
-        return {
-          id: item.id,
-        };
-      });
-
-      const response = await api.post('/cadastro_categorias_usuario', {
-        id_usuario: auth.id,
-        categorias,
-      });
-
-      console.log(response.data);
-      await fetchData();
-    } catch (err) {
-      console.error(err);
-    }
+    await assignCategory({ id: auth.id, fetchData, selectedItems });
   }, [auth.id, fetchData, selectedItems]);
 
-  const renderEmptyItem = useCallback(() => {
+  const renderEmptyCategoryItem = useCallback(() => {
     const searchResult = searchCategories();
 
     if (searchResult === 'add') {
@@ -198,90 +187,52 @@ export default function Categories() {
     );
   }, []);
 
-  const renderEmptyComponent = useCallback(
-    () => (
-      <View
-        style={{
-          backgroundColor: theme.colors.white,
-          width: '100%',
-          padding: 32,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Text
-          style={{
-            textAlign: 'center',
-          }}
-        >
-          Sem categorias, tente cadastrar uma para começar
-        </Text>
-      </View>
-    ),
+  const renderEmptyRegisteredComponent = useCallback(
+    emptyRegisteredComponent(),
     []
   );
 
-  const getAllCategories = useCallback(async () => {
-    try {
-      const response = await api.get('/categorias_despesas_geral');
-      setCanBeRegisterCategories(
-        response.data.map(item => {
-          return {
-            id: item.id,
-            category: item.categoria,
-          };
-        })
-      );
-    } catch (err) {
-      console.error(err);
-    }
+  const fetchAllCategories = useCallback(async () => {
+    await getAllCategories(setCanBeRegisterCategories);
   }, []);
 
-  const getUserCategories = useCallback(async () => {
-    try {
-      const response = await api.post(
-        '/busca_categorias_despesas_geral_usuario',
-        {
-          id_usuario: auth.id,
-        }
-      );
-      setRegisteredCategories(response.data);
-    } catch (err) {
-      console.error(err);
-    }
+  const fetchUserCategories = useCallback(async () => {
+    await getUserCategories(setRegisteredCategories, auth.id);
   }, [auth]);
 
   function filterCategories() {
-    const filtered = canBeRegisterCategories.filter(
-      categoryItem =>
-        !registeredCategories.some(
+    const updatedCategories = canBeRegisterCategories
+      .map(categoryItem => {
+        // Verificar se a categoria está na lista de registeredCategories
+        const isRegistered = registeredCategories.some(
           userCategoryItem =>
             userCategoryItem.categoria === categoryItem.category
-        )
-    );
+        );
 
-    setCanBeRegisterCategories(filtered);
+        // Retornar um novo objeto com a propriedade "registered" atualizada
+        return {
+          ...categoryItem,
+          registered: isRegistered,
+        };
+      })
+      .sort((a, b) => a.registered - b.registered);
+
+    setCanBeRegisterCategories(updatedCategories);
   }
 
-  const fetchData = useCallback(async () => {
+  async function fetchData() {
     setLoading(true);
-    await getAllCategories();
-    await getUserCategories();
+    await fetchAllCategories();
+    await fetchUserCategories();
     setLoading(false);
-  }, []);
+  }
 
   useFocusEffect(
     useCallback(() => {
-      async function fetchData() {
-        setLoading(true);
-        await getAllCategories();
-        await getUserCategories();
-        setLoading(false);
-      }
-
       fetchData();
     }, [])
   );
+
   useEffect(() => {
     filterCategories();
   }, [registeredCategories]);
@@ -308,7 +259,7 @@ export default function Categories() {
               renderItem={renderItem}
               keyExtractor={item => String(item.category)}
               extraData={selectedItems}
-              ListEmptyComponent={renderEmptyItem}
+              ListEmptyComponent={renderEmptyCategoryItem}
             />
 
             <Button
@@ -331,7 +282,7 @@ export default function Categories() {
               scrollEnabled
               keyExtractor={item => String(item.id)}
               renderItem={renderRegisteredItem}
-              ListEmptyComponent={renderEmptyComponent}
+              ListEmptyComponent={renderEmptyRegisteredComponent}
             />
           </Content>
         </>

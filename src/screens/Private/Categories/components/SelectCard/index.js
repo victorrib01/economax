@@ -9,6 +9,7 @@ export const SelectCard = props => {
 
   return (
     <TouchableOpacity
+      disabled={item.registered}
       onPress={() => toggleItem(item)}
       style={
         selected
@@ -20,7 +21,9 @@ export const SelectCard = props => {
               borderRadius: 8,
             }
           : {
-              backgroundColor: theme.colors.white,
+              backgroundColor: item.registered
+                ? theme.colors.gray
+                : theme.colors.white,
               width: '100%',
               alignItems: 'center',
               justifyContent: 'center',
@@ -44,6 +47,7 @@ export const SelectCard = props => {
         }
       >
         {item.category}
+        {item.registered && ` - Registrado`}
       </Text>
     </TouchableOpacity>
   );

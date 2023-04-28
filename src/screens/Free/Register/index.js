@@ -33,8 +33,8 @@ export default function Register() {
       );
 
     const response = await api.post('/cadastro', {
-      Usuario: user,
-      Senha: pass,
+      usuario: user,
+      senha: pass,
     });
 
     if (response.data['Message'] === 'Usuário cadastrado com sucesso!') {
@@ -55,7 +55,8 @@ export default function Register() {
         <Input
           label="usuário"
           value={user}
-          setValue={text => setUser(text.replace(' ', ''))}
+          autoCapitalize={'none'}
+          setValue={text => setUser(text.replace(' ', '').toLowerCase())}
         />
         <Input
           label="senha"
