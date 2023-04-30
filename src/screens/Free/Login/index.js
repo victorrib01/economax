@@ -43,6 +43,7 @@ export default function Login() {
     <Container>
       <Logo />
       <Text>{Constants.expoConfig.extra.API_URL}</Text>
+      <Text>atualizou pelo ota</Text>
       <Form>
         <Input
           label="usuário"

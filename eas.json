@@ -6,22 +6,19 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "releaseChannel": "development"
+      "channel": "development"
     },
     "preview": {
       "android": {
         "buildType": "apk"
       },
-      "releaseChannel": "preview"
+      "channel": "preview"
     },
     "production": {
-      "releaseChannel": "default"
+      "channel": "default"
     }
   },
   "submit": {
     "production": {}
-  },
-  "update": {
-    "releaseChannel": "default"
   }
 }
