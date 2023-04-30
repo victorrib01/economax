@@ -7,7 +7,8 @@ import { useAuth } from '../../../contexts/auth';
 import Container from '../../../components/Container';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../../infra/api';
-import { Alert } from 'react-native';
+import { Alert, Text } from 'react-native';
+import Constants from 'expo-constants';
 
 export default function Login() {
   const { saveAuthData } = useAuth();
@@ -36,10 +37,12 @@ export default function Login() {
   function handleRegister() {
     navigation.navigate('Register');
   }
+  console.log('Versão do aplicativo:', Constants.expoConfig.extra.API_URL);
 
   return (
     <Container>
       <Logo />
+      <Text>{Constants.expoConfig.extra.API_URL}</Text>
       <Form>
         <Input
           label="usuário"

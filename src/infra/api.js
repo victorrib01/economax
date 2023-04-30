@@ -1,7 +1,8 @@
 import axios from 'axios';
+import Constants from 'expo-constants';
 
 const api = axios.create({
-  baseURL: 'http://f5c2-45-226-126-124.ngrok-free.app',
+  baseURL: Constants.expoConfig.extra.API_URL || null,
 });
 
 export default api;
