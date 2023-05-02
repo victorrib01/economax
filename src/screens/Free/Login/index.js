@@ -37,13 +37,10 @@ export default function Login() {
   function handleRegister() {
     navigation.navigate('Register');
   }
-  console.log('Versão do aplicativo:', Constants.expoConfig.extra.API_URL);
 
   return (
-    <Container>
+    <Container noScroll>
       <Logo />
-      <Text>{Constants.expoConfig.extra.API_URL}</Text>
-      <Text>atualizou pelo ota</Text>
       <Form>
         <Input
           label="usuário"
@@ -57,6 +54,7 @@ export default function Login() {
         <Button title="Entrar" onPress={handleLogin} />
         <Button title="Cadastrar" outline onPress={handleRegister} />
       </Buttons>
+      <Text>{Constants.expoConfig.extra.VERSION}</Text>
     </Container>
   );
 }

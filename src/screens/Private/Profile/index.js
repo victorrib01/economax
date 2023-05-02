@@ -1,12 +1,12 @@
 import Container from '../../../components/Container';
-import { FlatList, StatusBar } from 'react-native';
+import { FlatList, StatusBar, Text } from 'react-native';
 import { Content, Title } from './styles';
 import Card from '../../../components/Card';
 
 import { useAuth } from '../../../contexts/auth';
 import Button from '../../../components/Button';
 import { View } from 'react-native';
-
+import Constants from 'expo-constants';
 export default function Profile() {
   const { auth, deleteAuthData } = useAuth();
 
@@ -32,6 +32,7 @@ export default function Profile() {
         <Title>ID: {auth.id}</Title>
         <Title>Usuario: {auth.user}</Title>
         <Button title="Sair" onPress={handleSignOut} />
+        <Text>Versão: {Constants.expoConfig.extra.VERSION}</Text>
       </View>
     </Container>
   );

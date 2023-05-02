@@ -8,7 +8,7 @@
     "ios": "npx expo start --ios",
     "web": "npx expo start --web",
     "format": "prettier --write .",
-    "eas:update": "eas update --branch main",
+    "eas:update": "eas update --branch preview",
     "build:apk": "eas build --platform android --profile preview"
   },
   "dependencies": {
