@@ -106,30 +106,30 @@ export default function Home() {
       const response = await api.post('/ultimas_despesas_usuario', {
         id_usuario: auth.id,
         usuario: auth.user,
-        dias: 2,
+        dias: '2',
       });
 
-      // function parseDate(dateString) {
-      //   const [date, time] = dateString.split(' ');
-      //   const [year, month, day] = date.split('/').map(Number);
-      //   const [hours, minutes, seconds] = time.split(':').map(Number);
+      function parseDate(dateString) {
+        const [date, time] = dateString.split(' ');
+        const [year, month, day] = date.split('-').map(Number);
+        const [hours, minutes, seconds] = time.split(':').map(Number);
 
-      //   return new Date(year, month - 1, day, hours, minutes, seconds);
-      // }
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+      }
 
-      // const sortedData = response.data
-      //   .map(item => {
-      //     return {
-      //       data: parseDate(item.data),
-      //       category: item.categoria,
-      //       // MOCK
-      //       value: item.valor,
-      //       // value: Math.floor(Math.random() * (99999 - 50 + 1) + 50),
-      //     };
-      //   })
-      //   .sort((a, b) => b.data - a.data);
+      const sortedData = response.data
+        .map(item => {
+          return {
+            data: parseDate(item.data),
+            category: item.categoria,
+            // MOCK
+            value: item.valor,
+            // value: Math.floor(Math.random() * (99999 - 50 + 1) + 50),
+          };
+        })
+        .sort((a, b) => b.data - a.data);
 
-      console.log(auth.id, auth.user, response.data);
+      setData(sortedData);
     } catch (err) {
       console.error('getLast5Records', err.toJSON());
     }
