@@ -102,7 +102,10 @@ export default function Categories() {
     <Container noScroll style={styles.containerStyle}>
       {!loading ? (
         <>
-          <CategorySelector inputRef={inputRef} />
+          <CategorySelector
+            inputRef={inputRef}
+            fetchAfterRegister={fetchData}
+          />
           <Separator />
           <Content>
             <Title>Categorias cadastradas</Title>

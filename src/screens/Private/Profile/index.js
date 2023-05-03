@@ -25,7 +25,7 @@ export default function Profile() {
         borderWidth: 1,
       }}
     >
-      {/* <View
+      <View
         style={{
           alignItems: 'center',
           justifyContent: 'center',
@@ -36,8 +36,7 @@ export default function Profile() {
         <Title>Usuario: {auth.user}</Title>
         <Button title="Sair" onPress={handleSignOut} />
         <Text>Versão: {Constants.expoConfig.extra.VERSION}</Text>
-      </View> */}
-      <CategorySelector />
+      </View>
     </Container>
   );
 }

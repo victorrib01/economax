@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { styles } from './styles';
 import Separator from '../Separator';
 import { FlatList } from 'react-native';
@@ -16,7 +16,7 @@ import { SelectCard } from '../SelectCard';
 import { AddCard } from '../AddCard';
 
 const CategorySelector = props => {
-  const { inputRef } = props;
+  const { inputRef, fetchAfterRegister } = props;
   const { auth } = useAuth();
 
   const [category, setCategory] = useState('');
@@ -43,10 +43,19 @@ const CategorySelector = props => {
     setCategory(value);
   }, []);
 
-  const handleRegister = useCallback(async () => {
+  const handleRegister = async () => {
     if (selectedItems.length === 0) return;
-    await assignCategory({ id: auth.id, fetchData, selectedItems });
-  }, [auth.id, fetchData, selectedItems]);
+    const response = await assignCategory({
+      id: auth.id,
+      fetchData,
+      selectedItems,
+    });
+    if (response.data.message === 'Categorias inseridas com sucesso!') {
+      Alert.alert(response.data.message);
+      setSelectedItems([]);
+      fetchAfterRegister();
+    }
+  };
 
   const toggleItem = useCallback(
     itemId => {

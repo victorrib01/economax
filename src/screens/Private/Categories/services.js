@@ -51,6 +51,8 @@ export async function assignCategory({ id, fetchData, selectedItems }) {
     });
 
     await fetchData();
+
+    return response;
   } catch (err) {
     console.error(err);
   }
