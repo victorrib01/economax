@@ -18,6 +18,7 @@ export const Input = React.forwardRef((props, ref) => {
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
       onChangeText={props.setValue}
+      onSubmitEditing={props.onSubmitEditing}
       ref={ref}
       {...props}
     />

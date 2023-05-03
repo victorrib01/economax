@@ -16,26 +16,15 @@ import { useUser } from '../../../contexts/user';
 import { useFocusEffect } from '@react-navigation/native';
 import reaisToCentavos from '../../../utils/formatReiasToCentavos';
 import { RefreshControl } from 'react-native';
+import CategorySelector2 from '../../../components/CategorySelector2';
 
 export default function Home() {
   const { auth } = useAuth();
-  const { userCategories } = useUser();
 
   const [value, setValue] = useState('');
   const [category, setCategory] = useState('');
-  const [categorySearch, setCategorySearch] = useState(false);
-
-  const categoryRef = useRef(null);
 
   const [data, setData] = useState([]);
-
-  const [showLastRecords, setShowsLastRecords] = useState(true);
-
-  const [canBeRegisterCategories, setCanBeRegisterCategories] = useState([
-    { id: 1, category: 'Alimentação' },
-    { id: 2, category: 'Moradia' },
-    { id: 3, category: 'Luz' },
-  ]);
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -64,41 +53,6 @@ export default function Home() {
     } catch (error) {
       console.error('handleRegister', error);
     }
-  }
-  const toggleItem = item => {
-    handleInputChange(item.category);
-    setSelectedItem(item.id);
-    setCategorySearch(false);
-  };
-
-  const renderItem = ({ item }) => {
-    const isSelected = selectedItem === item.id;
-    return (
-      <SelectCard isSelected={isSelected} toggleItem={toggleItem} item={item} />
-    );
-  };
-
-  const filteredCategories = canBeRegisterCategories.filter(item =>
-    item.category.toLowerCase().includes(category.toLowerCase())
-  );
-
-  const renderEmptyItem = () => {
-    return (
-      <SelectCard toggleItem={() => {}} item={{ category: 'Sem categoria' }} />
-    );
-  };
-
-  const handleInputChange = value => {
-    if (value.endsWith('  ')) {
-      return;
-    }
-    setCategory(value);
-  };
-
-  function handleCategory() {
-    if (categorySearch === false && category.length > 0) setCategory('');
-    setTimeout(() => categoryRef.current.focus(), 100);
-    setCategorySearch(true);
   }
 
   async function getLast5Records() {
@@ -135,27 +89,6 @@ export default function Home() {
     }
   }
 
-  async function getUserCategories() {
-    try {
-      const response = await api.post(
-        '/busca_categorias_despesas_geral_usuario',
-        {
-          id_usuario: auth.id,
-        }
-      );
-      setCanBeRegisterCategories(
-        response.data.map(item => {
-          return {
-            category: item.categoria,
-            id: item.id,
-          };
-        })
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await getLast5Records();
@@ -165,7 +98,6 @@ export default function Home() {
   useFocusEffect(
     useCallback(() => {
       getLast5Records();
-      getUserCategories();
     }, [])
   );
 
@@ -185,40 +117,13 @@ export default function Home() {
           setValue={setValue}
           style={{ marginBottom: 12 }}
         />
-        {categorySearch ? (
-          <>
-            <Input
-              label="categoria"
-              value={category}
-              editable={categorySearch}
-              setValue={handleInputChange}
-              ref={categoryRef}
-              style={{ marginBottom: 12 }}
-            />
 
-            <Separator style={{ marginBottom: 5 }} />
-
-            <FlatList
-              contentContainerStyle={{
-                gap: 12,
-              }}
-              data={filteredCategories}
-              renderItem={renderItem}
-              keyExtractor={item => String(item.id)}
-              ListEmptyComponent={renderEmptyItem}
-            />
-          </>
-        ) : (
-          <TouchableOpacity onPress={() => handleCategory()}>
-            <Input
-              label="categoria"
-              value={category}
-              editable={categorySearch}
-              setValue={handleInputChange}
-              style={{ marginBottom: 12 }}
-            />
-          </TouchableOpacity>
-        )}
+        <CategorySelector2
+          category={category}
+          setCategory={setCategory}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
+        />
 
         <Button
           style={{ marginVertical: 12 }}
@@ -232,35 +137,32 @@ export default function Home() {
         {/* <TouchableOpacity onPress={() => setShowsLastRecords(!showLastRecords)}> */}
         <Title>Últimos 5 registros</Title>
         {/* </TouchableOpacity> */}
-        {showLastRecords ? (
-          <FlatList
-            data={data}
-            contentContainerStyle={{
-              gap: 12,
-            }}
-            scrollEnabled
-            keyExtractor={item => String(item.value)}
-            renderItem={({ item }) => {
-              return <Card item={item} />;
-            }}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            ListEmptyComponent={() => (
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                  fontSize: theme.fontSize.medium,
-                  textAlign: 'center',
-                }}
-              >
-                Sem últimos registros, cadastre um para começar
-              </Text>
-            )}
-          />
-        ) : (
-          <></>
-        )}
+
+        <FlatList
+          data={data}
+          contentContainerStyle={{
+            gap: 12,
+          }}
+          scrollEnabled
+          keyExtractor={item => String(item.value)}
+          renderItem={({ item }) => {
+            return <Card item={item} />;
+          }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={() => (
+            <Text
+              style={{
+                fontWeight: 'bold',
+                fontSize: theme.fontSize.medium,
+                textAlign: 'center',
+              }}
+            >
+              Sem últimos registros, cadastre um para começar
+            </Text>
+          )}
+        />
       </Content>
     </Container>
   );

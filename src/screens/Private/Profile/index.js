@@ -7,11 +7,14 @@ import { useAuth } from '../../../contexts/auth';
 import Button from '../../../components/Button';
 import { View } from 'react-native';
 import Constants from 'expo-constants';
+import CategorySelector from '../../../components/CategorySelector';
+import { storeData } from '../../../storages/userStorage';
 export default function Profile() {
   const { auth, deleteAuthData } = useAuth();
 
   function handleSignOut() {
     deleteAuthData();
+    storeData(null);
   }
 
   return (
@@ -22,7 +25,7 @@ export default function Profile() {
         borderWidth: 1,
       }}
     >
-      <View
+      {/* <View
         style={{
           alignItems: 'center',
           justifyContent: 'center',
@@ -33,7 +36,8 @@ export default function Profile() {
         <Title>Usuario: {auth.user}</Title>
         <Button title="Sair" onPress={handleSignOut} />
         <Text>Versão: {Constants.expoConfig.extra.VERSION}</Text>
-      </View>
+      </View> */}
+      <CategorySelector />
     </Container>
   );
 }

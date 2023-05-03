@@ -20,6 +20,7 @@ export const PrivateAccessRoutes = () => {
         name="Home"
         component={Home}
         options={{
+          tabBarHideOnKeyboard: true,
           headerShown: false,
           tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => (
@@ -32,6 +33,8 @@ export const PrivateAccessRoutes = () => {
         component={Categories}
         options={{
           headerShown: false,
+          tabBarHideOnKeyboard: true,
+
           tabBarLabel: 'Categorias',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="ballot" color={color} size={size} />
@@ -43,6 +46,8 @@ export const PrivateAccessRoutes = () => {
         component={Registry}
         options={{
           headerShown: false,
+          tabBarHideOnKeyboard: true,
+
           tabBarLabel: 'Registros',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
@@ -58,6 +63,7 @@ export const PrivateAccessRoutes = () => {
         component={Profile}
         options={{
           headerShown: false,
+          tabBarHideOnKeyboard: true,
           tabBarLabel: 'Perfil',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="account" color={color} size={size} />

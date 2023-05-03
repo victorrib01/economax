@@ -23,7 +23,15 @@ export async function getUserCategories(setState, id) {
         id_usuario: id,
       }
     );
-    setState(response.data);
+
+    setState(
+      response.data.map(item => {
+        return {
+          id: item.id,
+          category: item.categoria,
+        };
+      })
+    );
   } catch (err) {
     console.error(err);
   }
@@ -42,7 +50,6 @@ export async function assignCategory({ id, fetchData, selectedItems }) {
       categorias,
     });
 
-    console.log('assignCategory response', response.data);
     await fetchData();
   } catch (err) {
     console.error(err);

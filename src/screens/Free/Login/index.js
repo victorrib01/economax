@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../../../infra/api';
 import { Alert, Text } from 'react-native';
 import Constants from 'expo-constants';
+import { storeData } from '../../../storages/userStorage';
 
 export default function Login() {
   const { saveAuthData } = useAuth();
@@ -27,6 +28,7 @@ export default function Login() {
         Alert.alert(response.data['Message'], 'Tente novamente.');
       if (response.data['Message'] === 'Usuário autenticado com sucesso!') {
         saveAuthData({ user, id: response.data['id_usuario'] });
+        storeData({ user, id: response.data['id_usuario'] });
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -48,7 +50,13 @@ export default function Login() {
           autoCapitalize={'none'}
           setValue={text => setUser(text.toLowerCase())}
         />
-        <Input label="senha" password value={pass} setValue={setPass} />
+        <Input
+          label="senha"
+          password
+          value={pass}
+          setValue={setPass}
+          onSubmitEditing={handleLogin}
+        />
       </Form>
       <Buttons>
         <Button title="Entrar" onPress={handleLogin} />
