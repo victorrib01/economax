@@ -2,7 +2,7 @@ import styled, { css } from 'styled-components/native';
 
 export const Form = styled.View`
   width: 100%;
-  height: 40%;
+  height: 45%;
   justify-content: space-between;
 `;
 
