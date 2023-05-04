@@ -78,7 +78,7 @@ const CategorySelector = props => {
 
   // RENDERS
   const renderItem = useCallback(
-    ({ item }) => {
+    ({ item, index }) => {
       const isSelected =
         selectedItems.findIndex(selectedItem => selectedItem.id === item.id) !==
         -1;
@@ -98,13 +98,17 @@ const CategorySelector = props => {
               toggleItem={toggleItem}
               item={item}
             />
-            <View style={{ marginTop: 20 }} />
-            <AddCard
-              category={category}
-              setCategory={setCategory}
-              fetchData={fetchData}
-              inputRef={inputRef}
-            />
+            {index === filteredCategories.length - 1 && (
+              <>
+                <View style={{ marginTop: 20 }} />
+                <AddCard
+                  category={category}
+                  setCategory={setCategory}
+                  fetchData={fetchData}
+                  inputRef={inputRef}
+                />
+              </>
+            )}
           </>
         );
 
@@ -205,7 +209,7 @@ const CategorySelector = props => {
   );
 
   useEffect(() => {
-    if (registeredCategories.length > 0) filterCategories();
+    if (registeredCategories?.length > 0) filterCategories();
   }, [registeredCategories]);
 
   return (

@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { Text, Alert } from 'react-native';
 
 import { Input } from '../../../components/Input';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Container from '../../../components/Container';
 import Button from '../../../components/Button';
 import Separator from '../../../components/Separator';
@@ -9,12 +9,10 @@ import theme from '../../../theme';
 import { FlatList, StatusBar } from 'react-native';
 import { Content, Form, Title } from './styles';
 import Card from '../../../components/Card';
-import { SelectCard } from '../Categories/components/SelectCard';
 import api from '../../../infra/api';
 import { useAuth } from '../../../contexts/auth';
-import { useUser } from '../../../contexts/user';
 import { useFocusEffect } from '@react-navigation/native';
-import reaisToCentavos from '../../../utils/formatReiasToCentavos';
+import { convertToCents } from '../../../utils/convertToCents';
 import { RefreshControl } from 'react-native';
 import CategorySelector2 from '../../../components/CategorySelector2';
 
@@ -29,8 +27,17 @@ export default function Home() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  const formatValue = value => {
+    const sanitizedValue = value.replace(/[^0-9]/g, '');
+    const floatValue = parseFloat(sanitizedValue) / 100;
+    return floatValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
   async function handleRegister() {
-    if (!reaisToCentavos(value) || !selectedItem)
+    if (!convertToCents(value) || !selectedItem)
       return Alert.alert('Preencha todos os campos!');
     try {
       const response = await api.post('/cadastro_gastos_usuario', {
@@ -39,7 +46,7 @@ export default function Home() {
         gastos: [
           {
             id_categoria: selectedItem,
-            valor: `${reaisToCentavos(value)}`,
+            valor: `${convertToCents(value)}`,
           },
         ],
       });
@@ -101,6 +108,10 @@ export default function Home() {
     }, [])
   );
 
+  useEffect(() => {
+    console.log(selectedItem);
+  }, [selectedItem]);
+
   return (
     <Container
       noScroll
@@ -111,10 +122,10 @@ export default function Home() {
     >
       <Form>
         <Input
-          keyboardType="decimal-pad"
+          keyboardType="numeric"
           label="valor"
           value={value}
-          setValue={setValue}
+          setValue={text => setValue(formatValue(text))}
           style={{ marginBottom: 12 }}
         />
 

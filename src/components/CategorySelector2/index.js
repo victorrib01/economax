@@ -2,7 +2,7 @@ import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import Input from '../Input';
 import { SelectCard } from '../SelectCard';
 import Separator from '../Separator';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../infra/api';
 import { useAuth } from '../../contexts/auth';
@@ -16,12 +16,6 @@ const CategorySelector2 = props => {
   const categoryRef = useRef(null);
 
   const [categorySearch, setCategorySearch] = useState(false);
-
-  // const [canBeRegisterCategories, setCanBeRegisterCategories] = useState([
-  //   { id: 1, category: 'Alimentação' },
-  //   { id: 2, category: 'Moradia' },
-  //   { id: 3, category: 'Luz' },
-  // ]);
 
   const [allCategories, setAllCategories] = useState([]);
 
@@ -59,6 +53,9 @@ const CategorySelector2 = props => {
     });
     if (response.data.message === 'Categorias inseridas com sucesso!') {
       Alert.alert(response.data.message);
+      handleInputChange(item.category);
+      setSelectedItem(item.id);
+      setCategorySearch(false);
     }
   }
 
@@ -67,19 +64,33 @@ const CategorySelector2 = props => {
 
     if (item.registered === false) {
       return (
-        <TouchableOpacity onPress={() => handleRegister(item)}>
-          <View
-            style={{
-              backgroundColor: theme.colors.gray,
-              width: '100%',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 8,
-            }}
-          >
-            <Text>{item.category} - Adicionar</Text>
-          </View>
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity onPress={() => handleRegister(item)}>
+            <View
+              style={{
+                backgroundColor: theme.colors.gray,
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 8,
+              }}
+            >
+              <Text>{item.category} - Adicionar</Text>
+            </View>
+          </TouchableOpacity>
+          {index === filteredCategories.length - 1 && (
+            <>
+              <View style={{ marginTop: 20 }} />
+              <AddCard
+                category={category}
+                setCategory={setCategory}
+                fetchData={getUserCategories}
+                setSelectedItem={setSelectedItem}
+                setCategorySearch={setCategorySearch}
+              />
+            </>
+          )}
+        </>
       );
     } else if (
       allCategories.filter(item => item.category === category).length === 0 &&
@@ -100,7 +111,8 @@ const CategorySelector2 = props => {
                 category={category}
                 setCategory={setCategory}
                 fetchData={getUserCategories}
-                // inputRef={inputRef}
+                setSelectedItem={setSelectedItem}
+                setCategorySearch={setCategorySearch}
               />
             </>
           )}
@@ -163,14 +175,15 @@ const CategorySelector2 = props => {
           id: item.id,
         };
       });
-      // setCanBeRegisterCategories(formatted);
       getAllCategories(formatted);
+      return Promise.resolve();
     } catch (err) {
       console.error(err);
+      return Promise.reject(err);
     }
   }
   async function getAllCategories(categories) {
-    if (categories.length > 0) {
+    if (categories?.length > 0) {
       try {
         const response = await api.get('/categorias_despesas_geral');
         const formatted = response.data.map(item => {
@@ -190,8 +203,6 @@ const CategorySelector2 = props => {
       } catch (err) {
         console.error(err.toJSON());
       }
-    } else {
-      setTimeout(() => getAllCategories(), 200);
     }
   }
 

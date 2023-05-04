@@ -21,26 +21,30 @@ export default function Register() {
   const [hide, setHide] = useState(true);
 
   async function handleRegister() {
-    if (pass === '' || repeatPass === '' || pass.length < 3)
-      return Alert.alert(
-        'Senhas invalida',
-        'A senhas é invalida, tente novamente'
-      );
-    if (pass !== repeatPass)
-      return Alert.alert(
-        'Senhas diferentes',
-        'A senhas não coincidem, tente novamente'
-      );
+    try {
+      if (pass === '' || repeatPass === '' || pass.length < 3)
+        return Alert.alert(
+          'Senhas invalida',
+          'A senhas é invalida, tente novamente'
+        );
+      if (pass !== repeatPass)
+        return Alert.alert(
+          'Senhas diferentes',
+          'A senhas não coincidem, tente novamente'
+        );
 
-    const response = await api.post('/cadastro', {
-      usuario: user,
-      senha: pass,
-    });
+      const response = await api.post('/cadastro', {
+        usuario: user,
+        senha: pass,
+      });
 
-    if (response.data['Message'] === 'Usuário cadastrado com sucesso!') {
-      saveAuthData({ id: response.data['id'], user });
-    } else {
-      Alert.alert(response.data['Message'], 'Tenta novamente');
+      if (response.data['Message'] === 'Usuário cadastrado com sucesso!') {
+        saveAuthData({ id: response.data['id'], user });
+      } else {
+        Alert.alert(response.data['Message'], 'Tenta novamente');
+      }
+    } catch (err) {
+      console.error('handleRegister', err.toJSON());
     }
   }
 

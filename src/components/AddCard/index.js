@@ -6,15 +6,13 @@ import api from '../../infra/api';
 import theme from '../../theme';
 
 export const AddCard = props => {
-  const { category, setCategory, fetchData, inputRef } = props;
+  const { category, setCategory, fetchData, setSelectedItem } = props;
   const { auth } = useAuth();
 
   const [loading, setLoading] = useState(false);
 
   async function handleRegisterCategory() {
     if (category === '' || category.length === 0 || category === ' ') {
-      setTimeout(() => inputRef.current.focus(), 500);
-
       return Alert.alert('Digite algo para registrar uma categoria');
     }
     setCategory(prev => prev.trim());
@@ -25,7 +23,7 @@ export const AddCard = props => {
         categoria: category.trim(),
       });
 
-      const categoryId = response.data[0].id;
+      let categoryId = response.data.id;
 
       if (categoryId) {
         const response = await api.post('/cadastro_categorias_usuario', {
@@ -36,16 +34,18 @@ export const AddCard = props => {
             },
           ],
         });
+
         if (response.data.message === 'Categorias inseridas com sucesso!') {
           Alert.alert('Categoria cadastrada com sucesso!');
-          setCategory('');
-          fetchData();
+          setCategorySearch(false);
+
+          fetchData().then(() => {
+            setSelectedItem(categoryId);
+          });
         }
       }
       setLoading(false);
     } catch (err) {
-      console.error(err);
-
       setLoading(false);
     }
   }
